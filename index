@@ -1,1 +1,332 @@
-nothing yet
+<!DOCTYPE html> <html> <head> <meta charset="UTF-8" /> <title>Fake Artist</title> <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+<!-- GLOBAL DARK THEME STYLES --> <style> body { margin: 0; padding: 0; background: #111827; color: #f9fafb; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; min-height: 100vh; display: flex; flex-direction: column; align-items: center; }
+
+h1, h2, h3, p {
+  margin: 0;
+  padding: 0;
+}
+
+button {
+  padding: 0.75rem 1.4rem;
+  border-radius: 999px;
+  border: none;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin: 0.25rem;
+}
+
+input {
+  padding: 0.75rem;
+  border-radius: 0.5rem;
+  border: 1px solid #374151;
+  background: #1f2937;
+  color: #f9fafb;
+  width: 70%;
+  font-size: 1rem;
+}
+
+/* NAME ENTRY SCREEN */
+#setup {
+  width: 100%;
+  max-width: 500px;
+  padding: 2rem;
+  text-align: center;
+  margin-top: 3rem;
+}
+
+#playerList {
+  margin-top: 1rem;
+  text-align: left;
+  padding-left: 1rem;
+}
+
+.player {
+  padding: 0.4rem 0;
+  border-bottom: 1px solid #374151;
+}
+
+#startGameBtn {
+  background: #2563eb;
+  color: white;
+  margin-top: 1rem;
+}
+
+#startGameBtn:disabled {
+  background: #4b5563;
+  cursor: default;
+}
+
+/* ORIGINAL GAME UI */
+.card {
+  background: #1f2937;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  max-width: 400px;
+  width: 100%;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.35);
+  margin-top: 2rem;
+}
+
+.hidden {
+  display: none;
+}
+
+.player-name {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+}
+
+.info {
+  font-size: 0.95rem;
+  color: #9ca3af;
+  margin-bottom: 1.2rem;
+}
+
+.reveal-text {
+  font-size: 1.4rem;
+  font-weight: 700;
+  margin: 1rem 0;
+  word-wrap: break-word;
+}
+
+.fake {
+  color: #f97316;
+}
+
+.word {
+  color: #22c55e;
+}
+
+#revealBtn {
+  background: #2563eb;
+  color: white;
+}
+
+#nextBtn {
+  background: #6b7280;
+  color: white;
+}
+
+#restartBtn {
+  background: #10b981;
+  color: white;
+  margin-top: 1rem;
+}
+
+</style> </head>
+
+<body>
+
+<!-- NAME ENTRY SCREEN --> <div id="setup"> <h2>Enter Player Names</h2>
+
+<input id="nameInput" placeholder="Player name" />
+<button onclick="addPlayer()" style="background:#2563eb;color:white;">Add</button>
+
+<h3 style="margin-top:1.5rem;">Players:</h3>
+<div id="playerList"></div>
+
+<button id="startGameBtn" onclick="beginGame()" disabled>Start Game</button>
+
+</div>
+
+<!-- ORIGINAL GAME UI (HIDDEN UNTIL NAME ENTRY COMPLETE) --> <div id="gameContainer" class="hidden"> <div class="card"> <h1>Fake Artist Goes to New York</h1>
+
+  <div id="setupArea">
+    <p class="info">
+      A random drawing word will be chosen automatically.
+      One of you will be the fake artist and will not see the word.
+    </p>
+    <button id="startBtn">Start Game</button>
+    <p class="small" style="color:#9ca3af;margin-top:0.75rem;">
+      After you tap “Start Game”, pass the phone around.
+      Each player may look only at their own screen.
+    </p>
+  </div>
+
+  <div id="gameArea" class="hidden">
+    <div id="playerInfo">
+      <div class="player-name" id="playerName"></div>
+      <p class="info">
+        Pass the phone to this player. When they are ready, tap “Reveal”.
+      </p>
+    </div>
+
+    <div id="revealArea" class="hidden">
+      <div id="revealText" class="reveal-text"></div>
+      <p class="small" style="color:#9ca3af;margin-top:0.75rem;">
+        Memorize this, then tap “Hide & pass” before giving the phone away.
+      </p>
+    </div>
+
+    <button id="revealBtn">Reveal</button>
+    <button id="nextBtn" class="hidden">Hide &amp; pass to next player</button>
+  </div>
+
+  <div id="endArea" class="hidden">
+    <p class="info">
+      All players have seen their roles. Start drawing and try to find the fake artist!
+    </p>
+    <button id="restartBtn">Play Again</button>
+  </div>
+</div>
+
+</div>
+
+<!-- JAVASCRIPT --> <script> /* ------------------------------ / / NAME ENTRY LOGIC / / ------------------------------ */
+
+const players = [];
+
+function addPlayer() {
+  const input = document.getElementById("nameInput");
+  const name = input.value.trim();
+  if (!name) return;
+
+  players.push(name);
+  input.value = "";
+  renderPlayers();
+}
+
+function renderPlayers() {
+  const list = document.getElementById("playerList");
+  list.innerHTML = "";
+
+  players.forEach(p => {
+    const div = document.createElement("div");
+    div.className = "player";
+    div.textContent = p;
+    list.appendChild(div);
+  });
+
+  document.getElementById("startGameBtn").disabled = players.length < 2;
+}
+
+function beginGame() {
+  document.getElementById("setup").classList.add("hidden");
+  document.getElementById("gameContainer").classList.remove("hidden");
+}
+
+
+/* ------------------------------ */
+/* ORIGINAL GAME LOGIC */
+/* ------------------------------ */
+
+const wordList = [
+  "Eiffel Tower", "Pizza slice", "Ice cream cone", "Hot-air balloon", "Castle", "Robot", "Rainbow",
+  "Backpack", "Snowman", "Tree", "Mountain", "Sunflower", "Umbrella", "Toothbrush", "Glasses",
+  "Spoon", "Lamp", "Couch", "Clock", "Pillow", "Broom", "Fish", "Cat", "Butterfly", "Turtle",
+  "Bird", "Bicycle", "Airplane", "Boat", "Train", "Rocket", "Treasure chest", "Magic wand", "Star",
+  "Moon", "Sun", "House", "Bridge", "Car", "Bus", "Camera", "Guitar", "Drum", "Book", "Pencil",
+  "Key", "Door", "Window", "Cloud", "Volcano", "Island", "Palm tree", "Tent", "Lighthouse",
+  "Penguin", "Elephant", "Lion", "Snail", "Dolphin", "Dragon", "Crown", "Treasure map",
+  "Rocket ship", "Spaceship", "Alien", "Pirate ship", "Knight", "Princess", "Castle tower",
+  "Chess piece", "Soccer ball", "Basketball hoop", "Skateboard", "Roller skates", "Snowflake",
+  "Iceberg", "Campfire", "Marshmallow on a stick", "Gift box", "Balloon", "Ferris wheel",
+  "Roller coaster", "Mailbox", "Helicopter", "Submarine", "Anchor", "Treble clef", "Microphone",
+  "Laptop", "Smartphone", "Headphones", "Globe", "Puzzle piece", "Hourglass", "Magnifying glass",
+  "Ribbon", "Leaf"
+];
+
+const setupArea = document.getElementById("setupArea");
+const gameArea = document.getElementById("gameArea");
+const endArea = document.getElementById("endArea");
+
+const startBtn = document.getElementById("startBtn");
+const playerNameEl = document.getElementById("playerName");
+const revealArea = document.getElementById("revealArea");
+const revealTextEl = document.getElementById("revealText");
+const revealBtn = document.getElementById("revealBtn");
+const nextBtn = document.getElementById("nextBtn");
+const restartBtn = document.getElementById("restartBtn");
+
+let drawingWord = "";
+let fakeIndex = -1;
+let currentPlayerIndex = 0;
+
+function resetGameState() {
+  drawingWord = "";
+  fakeIndex = -1;
+  currentPlayerIndex = 0;
+
+  setupArea.classList.remove("hidden");
+  gameArea.classList.add("hidden");
+  endArea.classList.add("hidden");
+  revealArea.classList.add("hidden");
+  revealBtn.classList.remove("hidden");
+  nextBtn.classList.add("hidden");
+  revealTextEl.textContent = "";
+  revealTextEl.classList.remove("fake", "word");
+}
+
+function getRandomWord() {
+  const index = Math.floor(Math.random() * wordList.length);
+  return wordList[index];
+}
+
+function startRoleReveal() {
+  drawingWord = getRandomWord();
+  fakeIndex = Math.floor(Math.random() * players.length);
+  currentPlayerIndex = 0;
+
+  setupArea.classList.add("hidden");
+  gameArea.classList.remove("hidden");
+  endArea.classList.add("hidden");
+
+  revealArea.classList.add("hidden");
+  revealBtn.classList.remove("hidden");
+  nextBtn.classList.add("hidden");
+
+  updatePlayerDisplay();
+}
+
+function updatePlayerDisplay() {
+  playerNameEl.textContent = players[currentPlayerIndex];
+  revealArea.classList.add("hidden");
+  revealBtn.classList.remove("hidden");
+  nextBtn.classList.add("hidden");
+  revealTextEl.textContent = "";
+  revealTextEl.classList.remove("fake", "word");
+}
+
+function revealForCurrentPlayer() {
+  const isFake = currentPlayerIndex === fakeIndex;
+
+  if (isFake) {
+    revealTextEl.textContent = "FAKE ARTIST";
+    revealTextEl.classList.add("fake");
+    revealTextEl.classList.remove("word");
+  } else {
+    revealTextEl.textContent = drawingWord;
+    revealTextEl.classList.add("word");
+    revealTextEl.classList.remove("fake");
+  }
+
+  revealArea.classList.remove("hidden");
+  revealBtn.classList.add("hidden");
+  nextBtn.classList.remove("hidden");
+}
+
+function nextPlayer() {
+  currentPlayerIndex++;
+
+  if (currentPlayerIndex >= players.length) {
+    gameArea.classList.add("hidden");
+    endArea.classList.remove("hidden");
+    return;
+  }
+
+  updatePlayerDisplay();
+}
+
+startBtn.addEventListener("click", startRoleReveal);
+revealBtn.addEventListener("click", revealForCurrentPlayer);
+nextBtn.addEventListener("click", nextPlayer);
+restartBtn.addEventListener("click", resetGameState);
+
+resetGameState();
+
+</script>
+
+</body> </html>
